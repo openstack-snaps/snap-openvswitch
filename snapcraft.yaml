@@ -1,0 +1,49 @@
+name: openvswitch
+version: 2.6.1
+summary: Open vSwitch
+description: |
+  Nuff said
+grade: devel
+confinement: strict
+
+apps:
+  switch:
+    command: snap-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl start --system-id=random
+    stop-command: snap-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl stop
+    daemon: forking
+    plugs:
+      - network
+      - network-bind
+      - openvswitch-support
+  ovs-vsctl:
+    command: snap-wrapper $SNAP/bin/ovs-vsctl
+    plugs:
+      - network
+  ovs-appctl:
+    command: snap-wrapper $SNAP/bin/ovs-appctl
+    plugs:
+      - network
+  ovs-ofctl:
+    command: snap-wrapper $SNAP/bin/ovs-ofctl
+    plugs:
+      - network
+  ovs-dpctl:
+    command: snap-wrapper $SNAP/bin/ovs-dpctl
+    plugs:
+      - network
+
+parts:
+  openvswitch:
+    source: http://openvswitch.org/releases/openvswitch-$SNAPCRAFT_PROJECT_VERSION.tar.gz
+    plugin: autotools
+    build-packages:
+      - libssl-dev
+      - libnuma-dev
+    stage-packages:
+      - uuid-runtime
+    configflags: []
+  wrapper:
+    source: conf
+    plugin: dump
+    after:
+      - openvswitch
