@@ -2,8 +2,8 @@
 
 set -e
 
-export OVS_LOGDIR=${SNAP_COMMON}/log
-export OVS_RUNDIR=${SNAP_COMMON}/run
+export OVS_LOGDIR=${SNAP_COMMON}/log/openvswitch
+export OVS_RUNDIR=${SNAP_COMMON}/run/openvswitch
 export OVS_SYSCONFDIR=${SNAP_COMMON}/etc
 export OVS_PKGDATADIR=${SNAP}/share/openvswitch
 export OVS_BINDIR=${SNAP}/bin

@@ -14,27 +14,28 @@ confinement: strict
 
 apps:
   switch:
-    command: snap-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl start --system-id=random
-    stop-command: snap-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl stop
+    command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl start --system-id=random
+    stop-command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl stop
     daemon: forking
     plugs:
       - network
       - network-bind
+      - network-control
       - openvswitch-support
   ovs-vsctl:
-    command: snap-wrapper $SNAP/bin/ovs-vsctl
+    command: ovs-wrapper $SNAP/bin/ovs-vsctl
     plugs:
       - network
   ovs-appctl:
-    command: snap-wrapper $SNAP/bin/ovs-appctl
+    command: ovs-wrapper $SNAP/bin/ovs-appctl
     plugs:
       - network
   ovs-ofctl:
-    command: snap-wrapper $SNAP/bin/ovs-ofctl
+    command: ovs-wrapper $SNAP/bin/ovs-ofctl
     plugs:
       - network
   ovs-dpctl:
-    command: snap-wrapper $SNAP/bin/ovs-dpctl
+    command: ovs-wrapper $SNAP/bin/ovs-dpctl
     plugs:
       - network
 
@@ -50,7 +51,9 @@ parts:
       - python-setuptools
     stage-packages:
       - uuid-runtime
-    configflags: []
+    configflags:
+      - "--localstatedir=/var/snap/openvswitch/common"
+      - "--sysconfdir=/var/snap/openvswitch/etc"
   wrapper:
     source: conf
     plugin: dump
