@@ -21,9 +21,9 @@ apps:
       - network
       - network-bind
       - network-control
-      - system-trace
-      - process-control
       - openvswitch-support
+      - process-control
+      - system-trace
   ovs-vsctl:
     command: ovs-wrapper $SNAP/bin/ovs-vsctl
     plugs:
