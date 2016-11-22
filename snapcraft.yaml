@@ -21,6 +21,8 @@ apps:
       - network
       - network-bind
       - network-control
+      - system-trace
+      - process-control
       - openvswitch-support
   ovs-vsctl:
     command: ovs-wrapper $SNAP/bin/ovs-vsctl
@@ -52,8 +54,8 @@ parts:
     stage-packages:
       - uuid-runtime
     configflags:
-      - "--localstatedir=/var/snap/openvswitch/common"
-      - "--sysconfdir=/var/snap/openvswitch/etc"
+      - "--localstatedir=/var/snap/$SNAPCRAFT_PROJECT_NAME/common"
+      - "--sysconfdir=/var/snap/$SNAPCRAFT_PROJECT_NAME/etc"
   wrapper:
     source: conf
     plugin: dump
