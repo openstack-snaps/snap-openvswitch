@@ -1,5 +1,5 @@
 name: openvswitch
-version: 2.6.1
+version: 2.10.0
 summary: Open vSwitch
 description: |
   Open vSwitch is a production quality, multilayer, software-based,
@@ -13,9 +13,20 @@ grade: devel
 confinement: strict
 
 apps:
-  switch:
-    command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl start --system-id=random
-    stop-command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl stop
+  ovs-vswitchd:
+    command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server --no-monitor --system-id=random start
+    stop-command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server stop
+    daemon: forking
+    plugs:
+      - network
+      - network-bind
+      - network-control
+      - openvswitch-support
+      - process-control
+      - system-trace
+  ovsdb-server:
+    command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd --no-monitor --system-id=random start
+    stop-command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd stop
     daemon: forking
     plugs:
       - network
@@ -42,12 +53,22 @@ apps:
       - network
 
 parts:
+  patches:
+    source: snap/patches/
+    plugin: dump
+    organize:
+      '*' : patches/
+    prime:
+      - -*
   openvswitch:
     source: http://openvswitch.org/releases/openvswitch-$SNAPCRAFT_PROJECT_VERSION.tar.gz
     plugin: autotools
     build-packages:
       - libssl-dev
       - libnuma-dev
+      - libcap-ng-dev
+      - libpcap-dev
+      - libunbound-dev
       - python-all
       - python-six
       - python-setuptools
@@ -56,6 +77,19 @@ parts:
     configflags:
       - "--localstatedir=/var/snap/$SNAPCRAFT_PROJECT_NAME/common"
       - "--sysconfdir=/var/snap/$SNAPCRAFT_PROJECT_NAME/etc"
+    after:
+      - patches
+    prepare: |
+      # Apply patches
+      for patch in ${SNAPCRAFT_STAGE}/patches/openvswitch/*.patch; do
+        echo "Applying $(basename "$patch") ..."
+        patch \
+          --batch \
+          --forward \
+          --strip 1 \
+          --input "$patch"
+        echo
+      done
   wrapper:
     source: conf
     plugin: dump
