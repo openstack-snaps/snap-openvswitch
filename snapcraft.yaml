@@ -17,6 +17,8 @@ apps:
     command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server --no-monitor --system-id=random start
     stop-command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server stop
     daemon: forking
+    passthrough:
+      after: [ovsdb-server]
     plugs:
       - network
       - network-bind
