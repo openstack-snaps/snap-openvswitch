@@ -1,5 +1,5 @@
 name: openvswitch
-version: 2.10.0
+version: 2.12.0
 summary: Open vSwitch
 description: |
   Open vSwitch is a production quality, multilayer, software-based,
@@ -11,11 +11,19 @@ description: |
   VMware's vNetwork distributed vswitch or Cisco's Nexus 1000V.
 grade: devel
 confinement: strict
+base: core18
+environment:
+  OVS_LOGDIR: $SNAP_COMMON/log/openvswitch
+  OVS_RUNDIR: $SNAP_COMMON/run/openvswitch
+  OVS_SYSCONFDIR: $SNAP_COMMON/etc
+  OVS_PKGDATADIR: $SNAP/share/openvswitch
+  OVS_BINDIR: $SNAP/bin
+  OVS_SBINDIR: $SNAP/sbin
 
 apps:
   ovs-vswitchd:
-    command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server --no-monitor --system-id=random start
-    stop-command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server stop
+    command: share/openvswitch/scripts/ovs-ctl --no-ovsdb-server --no-monitor --system-id=random start
+    stop-command: share/openvswitch/scripts/ovs-ctl --no-ovsdb-server stop
     daemon: forking
     passthrough:
       after: [ovsdb-server]
@@ -27,8 +35,8 @@ apps:
       - process-control
       - system-trace
   ovsdb-server:
-    command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd --no-monitor --system-id=random start
-    stop-command: ovs-wrapper $SNAP/share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd stop
+    command: share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd --no-monitor --system-id=random start
+    stop-command: share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd stop
     daemon: forking
     plugs:
       - network
@@ -38,30 +46,23 @@ apps:
       - process-control
       - system-trace
   ovs-vsctl:
-    command: ovs-wrapper $SNAP/bin/ovs-vsctl
+    command: ovs-vsctl
     plugs:
       - network
   ovs-appctl:
-    command: ovs-wrapper $SNAP/bin/ovs-appctl
+    command: ovs-appctl
     plugs:
       - network
   ovs-ofctl:
-    command: ovs-wrapper $SNAP/bin/ovs-ofctl
+    command: ovs-ofctl
     plugs:
       - network
   ovs-dpctl:
-    command: ovs-wrapper $SNAP/bin/ovs-dpctl
+    command: ovs-dpctl
     plugs:
       - network
 
 parts:
-  patches:
-    source: snap/patches/
-    plugin: dump
-    organize:
-      '*' : patches/
-    prime:
-      - -*
   openvswitch:
     source: http://openvswitch.org/releases/openvswitch-$SNAPCRAFT_PROJECT_VERSION.tar.gz
     plugin: autotools
@@ -76,24 +77,8 @@ parts:
       - python-setuptools
     stage-packages:
       - uuid-runtime
+      - libevent-2.1-6
+      - libunbound2
     configflags:
       - "--localstatedir=/var/snap/$SNAPCRAFT_PROJECT_NAME/common"
       - "--sysconfdir=/var/snap/$SNAPCRAFT_PROJECT_NAME/etc"
-    after:
-      - patches
-    prepare: |
-      # Apply patches
-      for patch in ${SNAPCRAFT_STAGE}/patches/openvswitch/*.patch; do
-        echo "Applying $(basename "$patch") ..."
-        patch \
-          --batch \
-          --forward \
-          --strip 1 \
-          --input "$patch"
-        echo
-      done
-  wrapper:
-    source: conf
-    plugin: dump
-    after:
-      - openvswitch

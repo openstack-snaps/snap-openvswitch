@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+env
+
+mkdir -p ${OVS_LOGDIR}
+mkdir -p ${OVS_RUNDIR}
+mkdir -p ${OVS_SYSCONFDIR}/openvswitch
