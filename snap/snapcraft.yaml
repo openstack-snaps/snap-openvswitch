@@ -1,5 +1,5 @@
 name: openvswitch
-version: 2.12.0
+version: 2.13.1
 summary: Open vSwitch
 description: |
   Open vSwitch is a production quality, multilayer, software-based,
@@ -11,19 +11,19 @@ description: |
   VMware's vNetwork distributed vswitch or Cisco's Nexus 1000V.
 grade: devel
 confinement: strict
-base: core18
+base: core20
 environment:
   OVS_LOGDIR: $SNAP_COMMON/log/openvswitch
   OVS_RUNDIR: $SNAP_COMMON/run/openvswitch
   OVS_SYSCONFDIR: $SNAP_COMMON/etc
-  OVS_PKGDATADIR: $SNAP/share/openvswitch
-  OVS_BINDIR: $SNAP/bin
-  OVS_SBINDIR: $SNAP/sbin
+  OVS_PKGDATADIR: $SNAP/usr/share/openvswitch
+  OVS_BINDIR: $SNAP/usr/bin
+  OVS_SBINDIR: $SNAP/usr/sbin
 
 apps:
   ovs-vswitchd:
-    command: share/openvswitch/scripts/ovs-ctl --no-ovsdb-server --no-monitor --system-id=random start
-    stop-command: share/openvswitch/scripts/ovs-ctl --no-ovsdb-server stop
+    command: usr/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server --no-monitor start
+    stop-command: usr/share/openvswitch/scripts/ovs-ctl --no-ovsdb-server stop
     daemon: forking
     passthrough:
       after: [ovsdb-server]
@@ -35,8 +35,8 @@ apps:
       - process-control
       - system-trace
   ovsdb-server:
-    command: share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd --no-monitor --system-id=random start
-    stop-command: share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd stop
+    command: usr/share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd --no-monitor start
+    stop-command: usr/share/openvswitch/scripts/ovs-ctl --no-ovs-vswitchd stop
     daemon: forking
     plugs:
       - network
@@ -46,19 +46,19 @@ apps:
       - process-control
       - system-trace
   ovs-vsctl:
-    command: ovs-vsctl
+    command: usr/bin/ovs-vsctl
     plugs:
       - network
   ovs-appctl:
-    command: ovs-appctl
+    command: usr/bin/ovs-appctl
     plugs:
       - network
   ovs-ofctl:
-    command: ovs-ofctl
+    command: usr/bin/ovs-ofctl
     plugs:
       - network
   ovs-dpctl:
-    command: ovs-dpctl
+    command: usr/bin/ovs-dpctl
     plugs:
       - network
 
@@ -77,8 +77,9 @@ parts:
       - python-setuptools
     stage-packages:
       - uuid-runtime
-      - libevent-2.1-6
-      - libunbound2
-    configflags:
+      - libevent-2.1-7
+      - libunbound8
+    autotools-configure-parameters:
+      - "--prefix=/usr"
       - "--localstatedir=/var/snap/$SNAPCRAFT_PROJECT_NAME/common"
       - "--sysconfdir=/var/snap/$SNAPCRAFT_PROJECT_NAME/etc"
