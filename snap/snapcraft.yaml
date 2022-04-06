@@ -1,5 +1,5 @@
 name: openvswitch
-version: 2.13.3
+version: 2.17.0
 summary: Open vSwitch
 description: |
   Open vSwitch is a production quality, multilayer, software-based,
